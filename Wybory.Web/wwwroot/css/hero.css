@@ -21,7 +21,6 @@ footer.footer {
     /* Delikatny czerwony naddatek u góry, żeby kolor łączył się z navbarem bez białego "odcięcia". */
     background: linear-gradient(to bottom, rgba(220, 38, 38, 0.09), transparent 55%), #ffffff;
     padding: 5.5rem 1.5rem 3.5rem;
-    isolation: isolate;
 }
 
 /* Miękkie, powoli dryfujące czerwone plamy w tle — odpowiednik "mesh gradient" z oryginału, bez WebGL. */
