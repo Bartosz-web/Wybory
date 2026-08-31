@@ -1,0 +1,40 @@
+@page
+@model Wybory.Web.Pages.Glosowanie.IndexModel
+@{
+    ViewData["Title"] = "Głosowanie";
+}
+
+<h1>Głosowanie</h1>
+
+@if (Model.Komunikat is not null)
+{
+    <div class="alert alert-success">@Model.Komunikat</div>
+}
+<div asp-validation-summary="All" class="text-danger"></div>
+
+<form method="post">
+    <div class="mb-3">
+        <label class="form-label" asp-for="Formularz.Pesel"></label>
+        <div class="input-group">
+            <input class="form-control" asp-for="Formularz.Pesel" maxlength="11" />
+            <button type="submit" asp-page-handler="PokazKandydatow" class="btn btn-outline-primary">Pokaż kandydatów w moim okręgu</button>
+        </div>
+    </div>
+
+    @if (Model.Kandydaci.Count > 0)
+    {
+        <fieldset class="mb-3">
+            <legend>Wybierz kandydata</legend>
+            @foreach (var kandydat in Model.Kandydaci)
+            {
+                <div class="form-check">
+                    <input class="form-check-input" type="radio" name="Formularz.KandydatId" value="@kandydat.Id" id="kandydat-@kandydat.Id" />
+                    <label class="form-check-label" for="kandydat-@kandydat.Id">
+                        @kandydat.Wyborca!.Imie @kandydat.Wyborca!.Nazwisko — <strong>@kandydat.Komitet!.Nazwa</strong> (nr @kandydat.NumerNaLiscie)
+                    </label>
+                </div>
+            }
+        </fieldset>
+        <button type="submit" asp-page-handler="OddajGlos" class="btn btn-success">Oddaj głos</button>
+    }
+</form>

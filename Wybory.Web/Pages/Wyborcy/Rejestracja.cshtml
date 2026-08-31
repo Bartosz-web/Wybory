@@ -1,0 +1,60 @@
+@page
+@model Wybory.Web.Pages.Wyborcy.RejestracjaModel
+@{
+    ViewData["Title"] = "Rejestracja wyborcy";
+}
+
+<h1>Rejestracja wyborcy</h1>
+
+@if (Model.Komunikat is not null)
+{
+    <div class="alert alert-success">@Model.Komunikat</div>
+}
+<div asp-validation-summary="All" class="text-danger"></div>
+
+<form method="post">
+    <div class="mb-3">
+        <label class="form-label" asp-for="Formularz.Pesel"></label>
+        <div class="input-group">
+            <input class="form-control" asp-for="Formularz.Pesel" maxlength="11" />
+            <button type="button" id="losuj-pesel" class="btn btn-outline-secondary">Losuj</button>
+        </div>
+    </div>
+    <div class="mb-3">
+        <label class="form-label" asp-for="Formularz.Imie"></label>
+        <div class="input-group">
+            <input class="form-control" asp-for="Formularz.Imie" />
+            <button type="button" id="losuj-imie" class="btn btn-outline-secondary">Losuj</button>
+        </div>
+    </div>
+    <div class="mb-3">
+        <label class="form-label" asp-for="Formularz.Nazwisko"></label>
+        <div class="input-group">
+            <input class="form-control" asp-for="Formularz.Nazwisko" />
+            <button type="button" id="losuj-nazwisko" class="btn btn-outline-secondary">Losuj</button>
+        </div>
+    </div>
+    <div class="mb-3">
+        <label class="form-label" asp-for="Formularz.OkregId">Okręg</label>
+        <select class="form-select" asp-for="Formularz.OkregId">
+            <option value="0">-- wybierz okręg --</option>
+            @foreach (var okreg in Model.Okregi)
+            {
+                <option value="@okreg.Id">@okreg.Nazwa</option>
+            }
+        </select>
+    </div>
+    <div class="form-check mb-2">
+        <input class="form-check-input" type="checkbox" asp-for="Formularz.CzynnePrawoWyborcze" />
+        <label class="form-check-label" asp-for="Formularz.CzynnePrawoWyborcze">Czynne prawo wyborcze (może głosować)</label>
+    </div>
+    <div class="form-check mb-3">
+        <input class="form-check-input" type="checkbox" asp-for="Formularz.BierneProwoWyborcze" />
+        <label class="form-check-label" asp-for="Formularz.BierneProwoWyborcze">Bierne prawo wyborcze (może kandydować)</label>
+    </div>
+    <button type="submit" class="btn btn-primary">Zarejestruj</button>
+</form>
+
+@section Scripts {
+    <script src="~/js/losowanie.js" asp-append-version="true"></script>
+}

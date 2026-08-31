@@ -1,0 +1,94 @@
+:root {
+  --pl-red: #dc2626;
+  --pl-red-dark: #b91c1c;
+  --pl-red-light: #fca5a5;
+  --ink: #111827;
+  --ink-muted: #4b5563;
+  --ink-light: #6b7280;
+}
+
+html {
+  font-size: 14px;
+}
+
+@media (min-width: 768px) {
+  html {
+    font-size: 16px;
+  }
+}
+
+.btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
+  box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
+}
+
+html {
+  position: relative;
+  min-height: 100%;
+}
+
+body {
+  margin-bottom: 60px;
+}
+
+/* Navbar — biało-czerwony motyw spójny z sekcją hero na stronie startowej.
+   Wyraźny czerwony pasek oddziela navbar od reszty strony (jak flaga: biel + czerwień).
+   Sticky na <header>, nie na .navbar: header jest jedynym rodzicem navbaru i ma
+   dokładnie jego wysokość, więc position:sticky na samym .navbar traci "miejsce"
+   do przyklejania się już po kilkudziesięciu pikselach scrolla. Header dziedziczy
+   wysokość body (całej strony), więc ma pełny zakres do przyklejenia się na górze.  */
+header {
+  position: sticky;
+  top: 0;
+  z-index: 1030;
+}
+
+.navbar {
+  background: #ffffff !important;
+  border-bottom: 3px solid var(--pl-red) !important;
+  box-shadow: 0 4px 14px -10px rgba(17, 24, 39, 0.15) !important;
+}
+
+.navbar-brand {
+  font-weight: 700;
+  color: var(--ink) !important;
+  display: inline-flex;
+  align-items: center;
+}
+
+.navbar-brand::before {
+  content: "";
+  display: inline-block;
+  width: 0.6rem;
+  height: 0.6rem;
+  border-radius: 50%;
+  background: var(--pl-red);
+  margin-right: 0.5rem;
+}
+
+.navbar .nav-link {
+  font-weight: 500;
+  position: relative;
+  color: var(--ink-muted) !important;
+  transition: color 0.2s ease;
+}
+
+.navbar .nav-link::after {
+  content: "";
+  position: absolute;
+  left: 0.75rem;
+  right: 0.75rem;
+  bottom: 0.3rem;
+  height: 2px;
+  background: var(--pl-red);
+  border-radius: 999px;
+  transform: scaleX(0);
+  transition: transform 0.2s ease;
+}
+
+.navbar .nav-link:hover {
+  color: var(--pl-red-dark) !important;
+}
+
+.navbar .nav-link:hover::after {
+  transform: scaleX(1);
+}

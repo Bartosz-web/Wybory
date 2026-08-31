@@ -1,0 +1,10 @@
+bin/
+obj/
+.vs/
+.idea/
+*.user
+
+# Baza SQLite — dane lokalne, tworzy się sama przy pierwszym starcie
+*.db
+*.db-shm
+*.db-wal

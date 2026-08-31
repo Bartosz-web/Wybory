@@ -1,0 +1,126 @@
+@page
+@model IndexModel
+@{
+    ViewData["Title"] = "Start";
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/hero.css" asp-append-version="true" />
+}
+
+@if (Model.WynikiSymulacji is { } symulacja)
+{
+    <section class="hero">
+        <div class="hero-inner">
+            <span class="hero-badge">
+                <span class="hero-badge-dot"></span>
+                Symulacja zakończona
+            </span>
+
+            <h1 class="hero-title">
+                Wyniki <span class="accent">symulacji</span> głosowania
+            </h1>
+
+            <p class="hero-subtitle">
+                Wygenerowano losowych wyborców, komitety i kandydatów w 3 okręgach (co najmniej 10 kandydatów
+                na okręg), oddano losowe głosy i policzono wyniki metodą D'Hondta.
+            </p>
+
+            <div class="hero-actions">
+                <a class="btn-hero-primary" asp-page="/Index">Powrót do menu</a>
+                <form method="post" asp-page-handler="Symuluj">
+                    <button type="submit" class="btn-hero-outline">🎲 Symuluj ponownie</button>
+                </form>
+            </div>
+        </div>
+    </section>
+
+    <div class="container my-4">
+        @foreach (var wyniki in symulacja)
+        {
+            <h2 class="mt-4">@wyniki.NazwaOkregu — mandatów: @wyniki.LiczbaMandatow — formuła: @wyniki.NazwaFormuly</h2>
+
+            @foreach (var komitet in wyniki.Komitety)
+            {
+                <div class="card mb-3">
+                    <div class="card-header d-flex justify-content-between">
+                        <strong>@komitet.NazwaKomitetu</strong>
+                        <span>Głosy: @komitet.Glosy — Mandaty: @komitet.Mandaty</span>
+                    </div>
+                    <table class="table mb-0">
+                        <thead>
+                            <tr>
+                                <th>Nr</th>
+                                <th>Kandydat</th>
+                                <th>Głosy</th>
+                                <th>Mandat</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var kandydat in komitet.Kandydaci)
+                            {
+                                <tr class="@(kandydat.CzyZdobylMandat ? "table-success" : "")">
+                                    <td>@kandydat.NumerNaLiscie</td>
+                                    <td>@kandydat.ImieNazwisko</td>
+                                    <td>@kandydat.Glosy</td>
+                                    <td>@(kandydat.CzyZdobylMandat ? "✓" : "")</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+        }
+    </div>
+}
+else
+{
+    <section class="hero">
+        <div class="hero-inner">
+            <span class="hero-badge">
+                <span class="hero-badge-dot"></span>
+                System Wyborczy
+            </span>
+
+            <h1 class="hero-title">
+                Twój <span class="accent">głos</span> ma znaczenie
+            </h1>
+
+            <p class="hero-subtitle">
+                Rejestr wyborców, komitetów i kandydatów w 3 okręgach wyborczych.
+                Bezpieczne głosowanie i przejrzyste zliczanie wyników.
+            </p>
+
+            <div class="hero-actions">
+                <a class="btn-hero-primary" asp-page="/Glosowanie/Index">Oddaj głos</a>
+                <a class="btn-hero-outline" asp-page="/Wyniki/Index">Zobacz wyniki</a>
+                <form method="post" asp-page-handler="Symuluj">
+                    <button type="submit" class="btn-hero-outline"
+                            onclick="return confirm('To wyczyści obecnych wyborców, komitety i kandydatów, i wygeneruje nowe losowe dane. Kontynuować?');">
+                        🎲 Symuluj głosowanie
+                    </button>
+                </form>
+            </div>
+
+            <div class="hero-stats">
+                @foreach (var okreg in Model.Okregi)
+                {
+                    <div class="hero-stat-card">
+                        <h3>@okreg.Nazwa</h3>
+                        <div class="hero-stat-row"><span>Mandatów</span> <strong>@okreg.LiczbaMandatow</strong></div>
+                        <div class="hero-stat-row"><span>Wyborców</span> <strong>@okreg.Wyborcy.Count</strong></div>
+                        <div class="hero-stat-row"><span>Komitetów</span> <strong>@okreg.KomitetyOkregu.Count</strong></div>
+                        <div class="hero-stat-row"><span>Kandydatów</span> <strong>@okreg.Kandydaci.Count</strong></div>
+                    </div>
+                }
+            </div>
+
+            <div class="hero-quicklinks">
+                <a class="hero-quicklink" asp-page="/Wyborcy/Rejestracja">Zarejestruj wyborcę</a>
+                <a class="hero-quicklink" asp-page="/Komitety/Rejestracja">Zarejestruj komitet</a>
+                <a class="hero-quicklink" asp-page="/Kandydaci/Rejestracja">Zarejestruj kandydata</a>
+                <a class="hero-quicklink" asp-page="/Kandydaci/Lista">Lista kandydatów</a>
+            </div>
+        </div>
+    </section>
+}

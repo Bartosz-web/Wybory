@@ -1,0 +1,73 @@
+@page
+@model Wybory.Web.Pages.Wyniki.IndexModel
+@{
+    ViewData["Title"] = "Wyniki";
+}
+
+<h1>Wyniki wyborów</h1>
+
+<form method="get" class="row g-2 align-items-end mb-4">
+    <div class="col-auto">
+        <label class="form-label">Okręg</label>
+        <select class="form-select" name="okregId">
+            <option value="">-- wybierz okręg --</option>
+            @foreach (var okreg in Model.Okregi)
+            {
+                <option value="@okreg.Id" selected="@(Model.Wyniki?.OkregId == okreg.Id)">@okreg.Nazwa</option>
+            }
+        </select>
+    </div>
+    <div class="col-auto">
+        <label class="form-label">Formuła podziału mandatów</label>
+        <select class="form-select" name="formula">
+            <option value="dhondt">D'Hondt</option>
+            <option value="sainte-lague">Sainte-Laguë</option>
+        </select>
+    </div>
+    <div class="col-auto">
+        <button type="submit" class="btn btn-primary">Pokaż wyniki</button>
+    </div>
+</form>
+
+@if (Model.Wyniki is { } wyniki)
+{
+    <h2>@wyniki.NazwaOkregu — mandatów: @wyniki.LiczbaMandatow — formuła: @wyniki.NazwaFormuly</h2>
+
+    @if (wyniki.Komitety.Count == 0)
+    {
+        <p class="text-muted">W tym okręgu nie zarejestrowano jeszcze żadnych kandydatów.</p>
+    }
+
+    @foreach (var komitet in wyniki.Komitety)
+    {
+        <div class="card mb-3">
+            <div class="card-header d-flex justify-content-between">
+                <strong>@komitet.NazwaKomitetu</strong>
+                <span>Głosy: @komitet.Glosy — Mandaty: @komitet.Mandaty</span>
+            </div>
+            <table class="table mb-0">
+                <thead>
+                    <tr>
+                        <th>Nr</th>
+                        <th>Kandydat</th>
+                        <th>Komitet</th>
+                        <th>Głosy</th>
+                        <th>Mandat</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var kandydat in komitet.Kandydaci)
+                    {
+                        <tr class="@(kandydat.CzyZdobylMandat ? "table-success" : "")">
+                            <td>@kandydat.NumerNaLiscie</td>
+                            <td>@kandydat.ImieNazwisko</td>
+                            <td>@kandydat.NazwaKomitetu</td>
+                            <td>@kandydat.Glosy</td>
+                            <td>@(kandydat.CzyZdobylMandat ? "✓" : "")</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+}
