@@ -12,21 +12,25 @@
 }
 <div asp-validation-summary="All" class="text-danger"></div>
 
-<form method="post">
+<form method="post" class="formularz-waski">
     <div class="mb-3">
         <label class="form-label" asp-for="Formularz.Nazwa"></label>
         <input class="form-control" asp-for="Formularz.Nazwa" />
     </div>
-    <div class="mb-3">
-        <label class="form-label">Okręgi, w których rejestruje się komitet</label>
+    <fieldset class="mb-3">
+        <legend class="form-label">Okręgi, w których rejestruje się komitet</legend>
         @foreach (var okreg in Model.Okregi)
         {
             <div class="form-check">
-                <input class="form-check-input" type="checkbox" name="Formularz.OkregiIds" value="@okreg.Id"
+                <input class="form-check-input" type="checkbox" id="okreg-@okreg.Id" name="Formularz.OkregiIds" value="@okreg.Id"
                        checked="@Model.Formularz.OkregiIds.Contains(okreg.Id)" />
-                <label class="form-check-label">@okreg.Nazwa</label>
+                <label class="form-check-label" for="okreg-@okreg.Id">@okreg.Nazwa</label>
             </div>
         }
-    </div>
-    <button type="submit" class="btn btn-primary">Zarejestruj komitet</button>
+    </fieldset>
+    <button type="submit" class="btn btn-primary w-sm-auto">Zarejestruj komitet</button>
 </form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

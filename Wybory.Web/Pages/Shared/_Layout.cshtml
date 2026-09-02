@@ -1,8 +1,11 @@
 ﻿<!DOCTYPE html>
-<html lang="en">
+<html lang="pl">
 <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    @* Brak maximum-scale: użytkownik musi móc powiększyć stronę (WCAG 1.4.4). *@
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#dc2626" />
+    <meta name="color-scheme" content="light" />
     <title>@ViewData["Title"] - System Wyborczy</title>
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
@@ -10,29 +13,36 @@
 </head>
 <body>
     <header>
-        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white">
-            <div class="container">
+            <nav class="navbar navbar-expand-lg navbar-light bg-white">
+            <div class="container-fluid">
                 <a class="navbar-brand" asp-area="" asp-page="/Index">System Wyborczy</a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
-                        aria-expanded="false" aria-label="Toggle navigation">
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
+                        data-bs-target="#glowneMenu" aria-controls="glowneMenu"
+                        aria-expanded="false" aria-label="Przełącz nawigację">
                     <span class="navbar-toggler-icon"></span>
                 </button>
-                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
-                    <ul class="navbar-nav flex-grow-1">
+                <div class="collapse navbar-collapse" id="glowneMenu">
+                    <ul class="navbar-nav ms-lg-auto">
                         <li class="nav-item">
                             <a class="nav-link" asp-area="" asp-page="/Index">Start</a>
                         </li>
-                        <li class="nav-item">
-                            <a class="nav-link" asp-area="" asp-page="/Wyborcy/Rejestracja">Wyborcy</a>
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" id="menuRejestracja" role="button"
+                               data-bs-toggle="dropdown" aria-expanded="false">Rejestracja</a>
+                            <ul class="dropdown-menu" aria-labelledby="menuRejestracja">
+                                <li><a class="dropdown-item" asp-page="/Wyborcy/Rejestracja">Wyborca</a></li>
+                                <li><a class="dropdown-item" asp-page="/Komitety/Rejestracja">Komitet</a></li>
+                                <li><a class="dropdown-item" asp-page="/Kandydaci/Rejestracja">Kandydat</a></li>
+                            </ul>
                         </li>
-                        <li class="nav-item">
-                            <a class="nav-link" asp-area="" asp-page="/Komitety/Rejestracja">Komitety</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" asp-area="" asp-page="/Kandydaci/Rejestracja">Kandydaci</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" asp-area="" asp-page="/Kandydaci/Lista">Lista kandydatów</a>
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" id="menuListy" role="button"
+                               data-bs-toggle="dropdown" aria-expanded="false">Listy</a>
+                            <ul class="dropdown-menu" aria-labelledby="menuListy">
+                                <li><a class="dropdown-item" asp-page="/Wyborcy/Lista">Wyborcy</a></li>
+                                <li><a class="dropdown-item" asp-page="/Komitety/Lista">Komitety</a></li>
+                                <li><a class="dropdown-item" asp-page="/Kandydaci/Lista">Kandydaci</a></li>
+                            </ul>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link" asp-area="" asp-page="/Glosowanie/Index">Głosowanie</a>
@@ -45,14 +55,15 @@
             </div>
         </nav>
     </header>
-    <div class="container">
-        <main role="main" class="pb-3">
-            @RenderBody()
-        </main>
-    </div>
+
+    @* Siatka "breakout": treść trafia do środkowej kolumny, a element
+       z klasą .full-bleed rozciąga się na pełną szerokość strony. *@
+    <main role="main" class="page-main">
+        @RenderBody()
+    </main>
 
     <footer class="border-top footer text-muted">
-        <div class="container">
+        <div>
             &copy; 2026 - System Wyborczy
         </div>
     </footer>

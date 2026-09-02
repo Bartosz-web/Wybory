@@ -1,0 +1,19 @@
+@using System.Globalization
+@model Wybory.Web.Pages.Shared.DaneFrekwencji
+@{
+    var szerokosc = Model.Frekwencja.ToString("0.##", CultureInfo.InvariantCulture);
+    var opis = $"Zagłosowało {Model.Glosow} z {Model.Uprawnionych} uprawnionych";
+}
+
+<div class="frekwencja-panel">
+    <div class="frekwencja-naglowek">
+        <span class="frekwencja-etykieta">@Model.Etykieta</span>
+        <strong class="frekwencja-wartosc">@Model.Frekwencja.ToString("0.0")%</strong>
+    </div>
+    <div class="pasek pasek-frekwencja" role="img" aria-label="@opis">
+        <span style="width: @szerokosc%"></span>
+    </div>
+    <p class="frekwencja-opis">
+        Zagłosowało <strong>@Model.Glosow</strong> z <strong>@Model.Uprawnionych</strong> uprawnionych.
+    </p>
+</div>

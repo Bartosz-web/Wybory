@@ -1,4 +1,17 @@
-﻿// Please see documentation at https://learn.microsoft.com/aspnet/core/client-side/bundling-and-minification
-// for details on configuring this project to bundle and minify static web assets.
+// Ulepszenia wspólne dla wszystkich stron. Wyłącznie progresywne: bez
+// JavaScriptu wszystko działa, tylko wymaga kliknięcia przycisku.
+(function () {
+    "use strict";
 
-// Write your JavaScript code.
+    document.addEventListener("DOMContentLoaded", function () {
+        // Formularz z data-auto-submit wysyła się po zmianie listy rozwijanej.
+        // Przycisk zostaje w markupie dla osób bez JavaScriptu.
+        document.querySelectorAll("form[data-auto-submit]").forEach(function (formularz) {
+            formularz.querySelectorAll("select").forEach(function (select) {
+                select.addEventListener("change", function () {
+                    formularz.submit();
+                });
+            });
+        });
+    });
+})();

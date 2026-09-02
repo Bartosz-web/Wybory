@@ -1,53 +1,51 @@
-/* Sekcja hero strony startowej — biało-czerwona paleta nawiązująca do polskich wyborów. */
-/* Zmienne --pl-red itp. zdefiniowane globalnie w site.css. */
+/* =========================================================================
+   Sekcja hero strony startowej, biało-czerwona paleta.
+   Zmienne --pl-red, --gutter i --space-* pochodzą z site.css.
 
-/* Stopka ma position:absolute;bottom:0 (patrz _Layout), więc na wysokich ekranach zostaje
-   puste, białe miejsce między treścią a stopką — czerwona plama w rogu hero się w nie nie
-   przedłuża. Dociągamy kolor przez tło <html> (zawsze sięga pełnej wysokości strony),
-   a stopka dostaje własne białe tło, żeby czerwień kończyła się dokładnie na jej linii. */
+   Siatki rozwijają się same przez auto-fit, bez ani jednego media query.
+   ========================================================================= */
+
 html {
     background: radial-gradient(circle at bottom right, rgba(220, 38, 38, 0.12), transparent 50%);
 }
 
-footer.footer {
-    background: #ffffff;
-}
-
+/* Sekcja pełnej szerokości. Nie ustawia własnej szerokości ani marginesów:
+   wychodzi poza kolumnę treści klasą .full-bleed zdefiniowaną w site.css. */
 .hero {
     position: relative;
-    width: 100vw;
-    margin-left: calc(-50vw + 50%);
+    isolation: isolate;
     overflow: hidden;
-    /* Delikatny czerwony naddatek u góry, żeby kolor łączył się z navbarem bez białego "odcięcia". */
     background: linear-gradient(to bottom, rgba(220, 38, 38, 0.09), transparent 55%), #ffffff;
-    padding: 5.5rem 1.5rem 3.5rem;
+    padding: var(--space-xl) var(--gutter) var(--space-lg);
 }
 
-/* Miękkie, powoli dryfujące czerwone plamy w tle — odpowiednik "mesh gradient" z oryginału, bez WebGL. */
+/* Rozmiary w vmin, żeby plamy nie zajmowały całego kadru telefonu ani nie
+   były ledwo widoczną kropką na monitorze. */
 .hero::before,
 .hero::after {
     content: "";
     position: absolute;
     z-index: -1;
     border-radius: 50%;
-    filter: blur(60px);
+    filter: blur(clamp(30px, 6vw, 60px));
     opacity: 0.4;
+    pointer-events: none;
 }
 
 .hero::before {
-    width: 34rem;
-    height: 34rem;
-    top: -20rem;
-    left: -8rem;
+    width: clamp(14rem, 45vmin, 34rem);
+    height: clamp(14rem, 45vmin, 34rem);
+    top: clamp(-20rem, -28vmin, -7rem);
+    left: clamp(-8rem, -10vmin, -3rem);
     background: radial-gradient(circle, var(--pl-red) 0%, transparent 70%);
     animation: hero-drift-a 18s ease-in-out infinite;
 }
 
 .hero::after {
-    width: 26rem;
-    height: 26rem;
-    bottom: -8rem;
-    right: -6rem;
+    width: clamp(11rem, 34vmin, 26rem);
+    height: clamp(11rem, 34vmin, 26rem);
+    bottom: clamp(-8rem, -10vmin, -3rem);
+    right: clamp(-6rem, -8vmin, -2rem);
     background: radial-gradient(circle, var(--pl-red-light) 0%, transparent 70%);
     animation: hero-drift-b 22s ease-in-out infinite;
 }
@@ -64,7 +62,7 @@ footer.footer {
 
 .hero-inner {
     position: relative;
-    max-width: 960px;
+    max-width: var(--content-max);
     margin: 0 auto;
     text-align: center;
 }
@@ -81,10 +79,11 @@ footer.footer {
     font-size: 0.8rem;
     font-weight: 600;
     letter-spacing: 0.02em;
-    margin-bottom: 1.5rem;
+    margin-bottom: var(--space-md);
 }
 
 .hero-badge-dot {
+    flex: 0 0 auto;
     width: 0.5rem;
     height: 0.5rem;
     border-radius: 50%;
@@ -98,11 +97,14 @@ footer.footer {
 }
 
 .hero-title {
-    font-size: clamp(2.25rem, 5vw, 3.75rem);
+    /* Niższy próg dolny, żeby na 320px tytuł mieścił się w dwóch linijkach. */
+    font-size: clamp(1.9rem, 1.2rem + 4.5vw, 3.75rem);
     font-weight: 800;
     line-height: 1.1;
+    letter-spacing: -0.02em;
     color: var(--ink);
-    margin-bottom: 1.25rem;
+    margin-bottom: var(--space-md);
+    text-wrap: balance;
 }
 
 .hero-title .accent {
@@ -120,65 +122,76 @@ footer.footer {
 }
 
 .hero-subtitle {
-    font-size: 1.1rem;
+    font-size: clamp(0.95rem, 0.9rem + 0.3vw, 1.15rem);
     font-weight: 300;
     color: var(--ink-muted);
-    max-width: 640px;
-    margin: 0 auto 2.25rem;
+    max-width: 40rem;
+    margin: 0 auto var(--space-lg);
     line-height: 1.6;
+    text-wrap: pretty;
 }
 
 .hero-actions {
     display: flex;
     flex-wrap: wrap;
     justify-content: center;
-    gap: 0.75rem;
-    margin-bottom: 3rem;
+    gap: var(--space-sm);
+    margin-bottom: var(--space-lg);
 }
 
-.btn-hero-primary {
-    padding: 0.75rem 2rem;
+/* Formularz jest tylko opakowaniem na przycisk. Bez display:contents jego
+   przycisk nie zawija się razem z pozostałymi. */
+.hero-actions form {
+    display: contents;
+}
+
+.btn-hero-primary,
+.btn-hero-outline {
+    /* Na telefonie przyciski zajmują całą szerokość, obok siebie stają
+       dopiero gdy jest na to miejsce. */
+    flex: 1 1 14rem;
+    max-width: 22rem;
+    min-height: var(--tap);
+    padding: 0.75rem 1.5rem;
     border-radius: 999px;
-    background: linear-gradient(135deg, var(--pl-red) 0%, var(--pl-red-dark) 100%);
-    color: #ffffff;
     font-weight: 600;
-    font-size: 0.95rem;
-    border: none;
-    box-shadow: 0 8px 20px -6px rgba(220, 38, 38, 0.5);
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    font-size: clamp(0.9rem, 0.87rem + 0.15vw, 1rem);
     text-decoration: none;
     display: inline-flex;
     align-items: center;
+    justify-content: center;
+    text-align: center;
 }
 
-.btn-hero-primary:hover {
+.btn-hero-primary {
+    background: linear-gradient(135deg, var(--pl-red) 0%, var(--pl-red-dark) 100%);
+    color: #ffffff;
+    border: none;
+    box-shadow: 0 8px 20px -6px rgba(220, 38, 38, 0.5);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.btn-hero-primary:hover,
+.btn-hero-primary:focus-visible {
     transform: translateY(-2px);
     box-shadow: 0 12px 24px -6px rgba(220, 38, 38, 0.6);
     color: #ffffff;
 }
 
 .btn-hero-outline {
-    padding: 0.75rem 2rem;
-    border-radius: 999px;
     background: transparent;
     color: var(--ink);
-    font-weight: 600;
-    font-size: 0.95rem;
-    border: 2px solid #e5e7eb;
+    border: 2px solid var(--line);
     transition: border-color 0.2s ease, color 0.2s ease, transform 0.2s ease;
-    text-decoration: none;
-    display: inline-flex;
-    align-items: center;
 }
 
-.btn-hero-outline:hover {
+.btn-hero-outline:hover,
+.btn-hero-outline:focus-visible {
     border-color: var(--pl-red);
     color: var(--pl-red-dark);
     transform: translateY(-2px);
 }
 
-/* .btn-hero-primary/-outline są też używane na <button> (np. formularz symulacji) —
-   zresetuj domyślny wygląd przycisku przeglądarki. */
 button.btn-hero-primary,
 button.btn-hero-outline {
     font-family: inherit;
@@ -186,12 +199,13 @@ button.btn-hero-outline {
     appearance: none;
 }
 
-/* Karty statystyk okręgów */
+/* Bez min() w minmax siatka auto-fit wymusza kolumnę szerszą niż ekran
+   na 320px i strona dostaje poziomy scroll. */
 .hero-stats {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-    gap: 1rem;
-    max-width: 960px;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 14rem), 1fr));
+    gap: var(--space-sm);
+    max-width: var(--content-max);
     margin: 0 auto;
 }
 
@@ -199,7 +213,7 @@ button.btn-hero-outline {
     background: #ffffff;
     border: 1px solid #f1f1f1;
     border-radius: 1rem;
-    padding: 1.25rem 1.5rem;
+    padding: var(--space-md);
     text-align: left;
     box-shadow: 0 4px 16px -8px rgba(17, 24, 39, 0.12);
     transition: transform 0.2s ease, box-shadow 0.2s ease;
@@ -214,15 +228,16 @@ button.btn-hero-outline {
     font-size: 1rem;
     font-weight: 700;
     color: var(--ink);
-    margin-bottom: 0.75rem;
-    padding-bottom: 0.5rem;
+    margin-bottom: var(--space-sm);
+    padding-bottom: var(--space-xs);
     border-bottom: 2px solid #fee2e2;
 }
 
 .hero-stat-row {
     display: flex;
     justify-content: space-between;
-    font-size: 0.85rem;
+    gap: var(--space-xs);
+    font-size: 0.875rem;
     color: var(--ink-light);
     padding: 0.15rem 0;
 }
@@ -232,31 +247,4 @@ button.btn-hero-outline {
     font-weight: 600;
 }
 
-/* Sekcja skrótów akcji */
-.hero-quicklinks {
-    max-width: 960px;
-    margin: 2.5rem auto 0;
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-    gap: 0.75rem;
-}
-
-.hero-quicklink {
-    display: block;
-    padding: 1rem 1.25rem;
-    border-radius: 0.75rem;
-    background: #fafafa;
-    border: 1px solid #f1f1f1;
-    color: var(--ink);
-    font-weight: 600;
-    font-size: 0.9rem;
-    text-decoration: none;
-    text-align: center;
-    transition: background 0.2s ease, border-color 0.2s ease, color 0.2s ease;
-}
-
-.hero-quicklink:hover {
-    background: #fef2f2;
-    border-color: #fecaca;
-    color: var(--pl-red-dark);
-}
+/* Skróty akcji korzystają ze wspólnego komponentu .skroty z site.css. */

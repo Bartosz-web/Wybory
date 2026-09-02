@@ -1,0 +1,102 @@
+@page
+@model Wybory.Web.Pages.Wyborcy.ListaModel
+@{
+    ViewData["Title"] = "Lista wyborców";
+}
+
+<h1>Lista wyborców</h1>
+
+<form method="get" class="filtry">
+    <div>
+        <label class="form-label" for="okregId">Okręg</label>
+        <select class="form-select" id="okregId" name="okregId">
+            <option value="">Wszystkie okręgi</option>
+            @foreach (var okreg in Model.Okregi)
+            {
+                <option value="@okreg.Id" selected="@(Model.OkregId == okreg.Id)">@okreg.Nazwa</option>
+            }
+        </select>
+    </div>
+    <div>
+        <label class="form-label" for="szukaj">Szukaj</label>
+        <input class="form-control" id="szukaj" name="szukaj" value="@Model.Szukaj"
+               placeholder="nazwisko, imię lub PESEL" autocomplete="off" />
+    </div>
+    <div class="filtry-akcja">
+        <button type="submit" class="btn btn-primary">Filtruj</button>
+    </div>
+</form>
+
+@if (Model.Wszystkich == 0)
+{
+    <div class="alert alert-info">
+        Nie zarejestrowano jeszcze żadnego wyborcy.
+        <a asp-page="/Wyborcy/Rejestracja">Zarejestruj pierwszego</a>
+        albo uruchom symulację na <a asp-page="/Index">stronie startowej</a>.
+    </div>
+}
+else
+{
+    <p class="text-muted">Pokazano @Model.Wyborcy.Count z @Model.Wszystkich zarejestrowanych wyborców.</p>
+
+    <div class="table-responsive">
+        <table class="table tabela-karty">
+            <thead>
+                <tr>
+                    <th>Wyborca</th>
+                    <th class="kol-waska">PESEL</th>
+                    <th>Okręg</th>
+                    <th>Prawa</th>
+                    <th class="kol-waska">Głos</th>
+                    <th class="kol-waska">Kandyduje</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var wyborca in Model.Wyborcy)
+                {
+                    <tr>
+                        <td data-etykieta="Wyborca">@wyborca.Nazwisko @wyborca.Imie</td>
+                        <td class="kol-waska" data-etykieta="PESEL"><code>@wyborca.Pesel</code></td>
+                        <td data-etykieta="Okręg">@wyborca.NazwaOkregu</td>
+                        <td data-etykieta="Prawa">
+                            @if (wyborca.CzynnePrawo)
+                            {
+                                <span class="znacznik znacznik-czynne">czynne</span>
+                            }
+                            @if (wyborca.BiernePrawo)
+                            {
+                                <span class="znacznik znacznik-bierne">bierne</span>
+                            }
+                            @if (!wyborca.CzynnePrawo && !wyborca.BiernePrawo)
+                            {
+                                <span class="znacznik znacznik-brak">brak</span>
+                            }
+                        </td>
+                        <td class="kol-waska" data-etykieta="Głos">
+                            @if (wyborca.Zaglosowal)
+                            {
+                                <span class="znacznik znacznik-tak">oddany</span>
+                            }
+                            else if (wyborca.CzynnePrawo)
+                            {
+                                <span class="znacznik znacznik-nie">nie oddany</span>
+                            }
+                            else
+                            {
+                                <span class="znacznik znacznik-brak">—</span>
+                            }
+                        </td>
+                        <td class="kol-waska" data-etykieta="Kandyduje">
+                            @(wyborca.Kandyduje ? "tak" : "")
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+
+    @if (Model.Wyborcy.Count == 0)
+    {
+        <p class="text-muted">Żaden wyborca nie pasuje do wybranych kryteriów.</p>
+    }
+}

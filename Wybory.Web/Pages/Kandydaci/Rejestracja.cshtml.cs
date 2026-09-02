@@ -13,7 +13,7 @@ public class RejestracjaModel(BazaDanych db, UslugaRejestracji uslugaRejestracji
     public DaneFormularza Formularz { get; set; } = new();
 
     public List<Wyborca> UprawnieniWyborcy { get; private set; } = [];
-    public List<Komitet> Komitety { get; private set; } = [];
+    public List<PozycjaKomitetu> Komitety { get; private set; } = [];
     public List<Okreg> Okregi { get; private set; } = [];
     public string? Komunikat { get; private set; }
 
@@ -47,9 +47,27 @@ public class RejestracjaModel(BazaDanych db, UslugaRejestracji uslugaRejestracji
             .Where(w => w.BierneProwoWyborcze && w.Kandydatura == null)
             .OrderBy(w => w.Nazwisko).ThenBy(w => w.Imie)
             .ToListAsync();
-        Komitety = await db.Komitety.OrderBy(k => k.Nazwa).ToListAsync();
+
+        // Lista okręgów komitetu służy stronie do zawężenia wyboru. Rekord budujemy
+        // w pamięci, bo EF Core nie materializuje kolekcji w argumencie konstruktora.
+        var surowe = await db.Komitety
+            .OrderBy(k => k.Nazwa)
+            .Select(k => new
+            {
+                k.Id,
+                k.Nazwa,
+                OkregiIds = k.Okregi.Select(ko => ko.OkregId).ToList()
+            })
+            .ToListAsync();
+
+        Komitety = surowe
+            .Select(k => new PozycjaKomitetu(k.Id, k.Nazwa, k.OkregiIds))
+            .ToList();
+
         Okregi = await db.Okregi.OrderBy(o => o.Id).ToListAsync();
     }
+
+    public record PozycjaKomitetu(int Id, string Nazwa, List<int> OkregiIds);
 
     public class DaneFormularza
     {

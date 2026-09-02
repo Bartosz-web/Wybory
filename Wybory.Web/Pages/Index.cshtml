@@ -1,4 +1,5 @@
 @page
+@using System.Globalization
 @model IndexModel
 @{
     ViewData["Title"] = "Start";
@@ -10,7 +11,7 @@
 
 @if (Model.WynikiSymulacji is { } symulacja)
 {
-    <section class="hero">
+    <section class="hero full-bleed">
         <div class="hero-inner">
             <span class="hero-badge">
                 <span class="hero-badge-dot"></span>
@@ -27,55 +28,36 @@
             </p>
 
             <div class="hero-actions">
-                <a class="btn-hero-primary" asp-page="/Index">Powrót do menu</a>
+                <a class="btn-hero-primary" asp-page="/Wyniki/Index">Podsumowanie zbiorcze</a>
+                <a class="btn-hero-outline" asp-page="/Index">Powrót do menu</a>
                 <form method="post" asp-page-handler="Symuluj">
-                    <button type="submit" class="btn-hero-outline">🎲 Symuluj ponownie</button>
+                    <button type="submit" class="btn-hero-outline"
+                            onclick="return confirm('To wyczyści obecne dane i wygeneruje nowe losowe. Kontynuować?');">
+                        Symuluj ponownie
+                    </button>
                 </form>
             </div>
         </div>
     </section>
 
-    <div class="container my-4">
+    <div class="hero-wyniki">
         @foreach (var wyniki in symulacja)
         {
-            <h2 class="mt-4">@wyniki.NazwaOkregu — mandatów: @wyniki.LiczbaMandatow — formuła: @wyniki.NazwaFormuly</h2>
+            <h2>@wyniki.NazwaOkregu — mandatów: @wyniki.LiczbaMandatow — formuła: @wyniki.NazwaFormuly</h2>
+
+            @await Html.PartialAsync("_PanelFrekwencji",
+                new Wybory.Web.Pages.Shared.DaneFrekwencji("Frekwencja", wyniki.LiczbaUprawnionych, wyniki.LiczbaGlosow))
 
             @foreach (var komitet in wyniki.Komitety)
             {
-                <div class="card mb-3">
-                    <div class="card-header d-flex justify-content-between">
-                        <strong>@komitet.NazwaKomitetu</strong>
-                        <span>Głosy: @komitet.Glosy — Mandaty: @komitet.Mandaty</span>
-                    </div>
-                    <table class="table mb-0">
-                        <thead>
-                            <tr>
-                                <th>Nr</th>
-                                <th>Kandydat</th>
-                                <th>Głosy</th>
-                                <th>Mandat</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @foreach (var kandydat in komitet.Kandydaci)
-                            {
-                                <tr class="@(kandydat.CzyZdobylMandat ? "table-success" : "")">
-                                    <td>@kandydat.NumerNaLiscie</td>
-                                    <td>@kandydat.ImieNazwisko</td>
-                                    <td>@kandydat.Glosy</td>
-                                    <td>@(kandydat.CzyZdobylMandat ? "✓" : "")</td>
-                                </tr>
-                            }
-                        </tbody>
-                    </table>
-                </div>
+                <partial name="_KartaKomitetu" model="komitet" />
             }
         }
     </div>
 }
 else
 {
-    <section class="hero">
+    <section class="hero full-bleed">
         <div class="hero-inner">
             <span class="hero-badge">
                 <span class="hero-badge-dot"></span>
@@ -97,29 +79,43 @@ else
                 <form method="post" asp-page-handler="Symuluj">
                     <button type="submit" class="btn-hero-outline"
                             onclick="return confirm('To wyczyści obecnych wyborców, komitety i kandydatów, i wygeneruje nowe losowe dane. Kontynuować?');">
-                        🎲 Symuluj głosowanie
+                        Symuluj głosowanie
                     </button>
                 </form>
             </div>
 
             <div class="hero-stats">
-                @foreach (var okreg in Model.Okregi)
+                @foreach (var okreg in Model.Kafelki)
                 {
                     <div class="hero-stat-card">
                         <h3>@okreg.Nazwa</h3>
                         <div class="hero-stat-row"><span>Mandatów</span> <strong>@okreg.LiczbaMandatow</strong></div>
-                        <div class="hero-stat-row"><span>Wyborców</span> <strong>@okreg.Wyborcy.Count</strong></div>
-                        <div class="hero-stat-row"><span>Komitetów</span> <strong>@okreg.KomitetyOkregu.Count</strong></div>
-                        <div class="hero-stat-row"><span>Kandydatów</span> <strong>@okreg.Kandydaci.Count</strong></div>
+                        <div class="hero-stat-row"><span>Wyborców</span> <strong>@okreg.Wyborcow</strong></div>
+                        <div class="hero-stat-row"><span>Komitetów</span> <strong>@okreg.Komitetow</strong></div>
+                        <div class="hero-stat-row"><span>Kandydatów</span> <strong>@okreg.Kandydatow</strong></div>
+
+                        <div class="hero-stat-frekwencja">
+                            @{
+                                var szerokosc = okreg.Frekwencja.ToString("0.##", CultureInfo.InvariantCulture);
+                                var opisFrekwencji = $"Zagłosowało {okreg.Glosow} z {okreg.Uprawnionych} uprawnionych";
+                            }
+                            <div class="hero-stat-row">
+                                <span>Frekwencja</span>
+                                <strong>@okreg.Frekwencja.ToString("0.0")%</strong>
+                            </div>
+                            <div class="pasek pasek-frekwencja" role="img" aria-label="@opisFrekwencji">
+                                <span style="width: @szerokosc%"></span>
+                            </div>
+                        </div>
                     </div>
                 }
             </div>
 
-            <div class="hero-quicklinks">
-                <a class="hero-quicklink" asp-page="/Wyborcy/Rejestracja">Zarejestruj wyborcę</a>
-                <a class="hero-quicklink" asp-page="/Komitety/Rejestracja">Zarejestruj komitet</a>
-                <a class="hero-quicklink" asp-page="/Kandydaci/Rejestracja">Zarejestruj kandydata</a>
-                <a class="hero-quicklink" asp-page="/Kandydaci/Lista">Lista kandydatów</a>
+            <div class="skroty">
+                <a class="skrot" asp-page="/Wyborcy/Rejestracja">Zarejestruj wyborcę</a>
+                <a class="skrot" asp-page="/Komitety/Rejestracja">Zarejestruj komitet</a>
+                <a class="skrot" asp-page="/Kandydaci/Rejestracja">Zarejestruj kandydata</a>
+                <a class="skrot" asp-page="/Wyborcy/Lista">Lista wyborców</a>
             </div>
         </div>
     </section>

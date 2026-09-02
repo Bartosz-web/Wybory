@@ -8,3 +8,7 @@ obj/
 *.db
 *.db-shm
 *.db-wal
+
+# Wyniki uruchomienia testów (coverlet.collector)
+TestResults/
+[Tt]est[Rr]esults/

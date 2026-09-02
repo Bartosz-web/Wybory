@@ -1,37 +1,134 @@
 @page
+@using System.Globalization
 @model Wybory.Web.Pages.Wyniki.IndexModel
 @{
     ViewData["Title"] = "Wyniki";
+
+    // Porównania poza atrybutami HTML: wyrażenie Razor z cudzysłowem w wartości
+    // atrybutu zamyka ten atrybut przedwcześnie.
+    var formulaDhondt = Model.Formula == "dhondt";
+    var formulaSainteLague = Model.Formula == "sainte-lague";
 }
 
 <h1>Wyniki wyborów</h1>
 
-<form method="get" class="row g-2 align-items-end mb-4">
-    <div class="col-auto">
-        <label class="form-label">Okręg</label>
-        <select class="form-select" name="okregId">
-            <option value="">-- wybierz okręg --</option>
+<form method="get" class="filtry" data-auto-submit>
+    <div>
+        <label class="form-label" for="okregId">Okręg</label>
+        <select class="form-select" id="okregId" name="okregId">
+            <option value="">Wszystkie okręgi — podsumowanie</option>
             @foreach (var okreg in Model.Okregi)
             {
-                <option value="@okreg.Id" selected="@(Model.Wyniki?.OkregId == okreg.Id)">@okreg.Nazwa</option>
+                <option value="@okreg.Id" selected="@(Model.OkregId == okreg.Id)">@okreg.Nazwa</option>
             }
         </select>
     </div>
-    <div class="col-auto">
-        <label class="form-label">Formuła podziału mandatów</label>
-        <select class="form-select" name="formula">
-            <option value="dhondt">D'Hondt</option>
-            <option value="sainte-lague">Sainte-Laguë</option>
+    <div>
+        <label class="form-label" for="formula">Formuła podziału mandatów</label>
+        <select class="form-select" id="formula" name="formula">
+            <option value="dhondt" selected="@formulaDhondt">D'Hondt</option>
+            <option value="sainte-lague" selected="@formulaSainteLague">Sainte-Laguë</option>
         </select>
     </div>
-    <div class="col-auto">
+    <div class="filtry-przelacznik">
+        <div class="form-check">
+            <input class="form-check-input" type="checkbox" id="prog" name="prog" value="true" checked="@Model.Prog" />
+            <label class="form-check-label" for="prog">@Model.EtykietaProgu</label>
+        </div>
+    </div>
+    <div class="filtry-akcja">
         <button type="submit" class="btn btn-primary">Pokaż wyniki</button>
     </div>
 </form>
 
+@if (Model.Blad is not null)
+{
+    <div class="alert alert-warning">@Model.Blad</div>
+}
+
+@if (Model.Podsumowanie is { } podsumowanie)
+{
+    <h2>Podsumowanie wszystkich okręgów — formuła: @podsumowanie.NazwaFormuly@Model.OpisProgu</h2>
+
+    @if (podsumowanie.LiczbaGlosow == 0)
+    {
+        <div class="alert alert-info">
+            Nie oddano jeszcze żadnego głosu. <a asp-page="/Glosowanie/Index">Przejdź do głosowania</a>
+            albo uruchom symulację na <a asp-page="/Index">stronie startowej</a>.
+        </div>
+    }
+    else
+    {
+        @await Html.PartialAsync("_PanelFrekwencji",
+            new Wybory.Web.Pages.Shared.DaneFrekwencji("Frekwencja łączna", podsumowanie.LiczbaUprawnionych, podsumowanie.LiczbaGlosow))
+
+        <div class="table-responsive">
+            <table class="table tabela-karty">
+                <thead>
+                    <tr>
+                        <th>Komitet</th>
+                        <th class="kol-waska">Głosy</th>
+                        <th class="kol-waska">Udział</th>
+                        <th class="kol-waska">Mandaty</th>
+                        <th>Podział mandatów</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var komitet in podsumowanie.Komitety)
+                    {
+                        <tr class="@(komitet.Mandaty > 0 ? "table-success" : "")">
+                            <td data-etykieta="Komitet">@komitet.NazwaKomitetu</td>
+                            <td class="kol-waska" data-etykieta="Głosy">@komitet.Glosy</td>
+                            <td class="kol-waska" data-etykieta="Udział">@komitet.ProcentGlosow.ToString("0.0")%</td>
+                            <td class="kol-waska" data-etykieta="Mandaty">@komitet.Mandaty</td>
+                            <td data-etykieta="Podział mandatów">
+                                @{
+                                    var szerokosc = komitet.ProcentGlosow.ToString("0.##", CultureInfo.InvariantCulture);
+                                    var opisPaska = $"Udział w głosach: {komitet.ProcentGlosow:0.0} procent";
+                                }
+                                <div class="pasek" role="img" aria-label="@opisPaska">
+                                    <span style="width: @szerokosc%"></span>
+                                </div>
+                                @if (komitet.Mandaty > 0)
+                                {
+                                    <div class="mandaty">
+                                        @for (var i = 0; i < komitet.Mandaty; i++)
+                                        {
+                                            <span class="mandat"></span>
+                                        }
+                                    </div>
+                                }
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        <p class="text-muted">
+            Do rozdzielenia było łącznie @podsumowanie.LiczbaMandatow mandatów w @podsumowanie.Okregi.Count okręgach.
+            Podział mandatów jest zawsze okręgowy — tabela sumuje wyniki poszczególnych okręgów.
+        </p>
+
+        <h2>Wyniki w okręgach</h2>
+        <div class="skroty">
+            @foreach (var okreg in podsumowanie.Okregi)
+            {
+                <a class="skrot" asp-page="/Wyniki/Index"
+                   asp-route-okregId="@okreg.OkregId" asp-route-formula="@Model.Formula" asp-route-prog="@Model.Prog">
+                    @okreg.NazwaOkregu
+                </a>
+            }
+        </div>
+    }
+}
+
 @if (Model.Wyniki is { } wyniki)
 {
-    <h2>@wyniki.NazwaOkregu — mandatów: @wyniki.LiczbaMandatow — formuła: @wyniki.NazwaFormuly</h2>
+    <h2>@wyniki.NazwaOkregu — mandatów: @wyniki.LiczbaMandatow — formuła: @wyniki.NazwaFormuly@Model.OpisProgu</h2>
+
+    @await Html.PartialAsync("_PanelFrekwencji",
+        new Wybory.Web.Pages.Shared.DaneFrekwencji("Frekwencja w okręgu", wyniki.LiczbaUprawnionych, wyniki.LiczbaGlosow))
 
     @if (wyniki.Komitety.Count == 0)
     {
@@ -40,34 +137,6 @@
 
     @foreach (var komitet in wyniki.Komitety)
     {
-        <div class="card mb-3">
-            <div class="card-header d-flex justify-content-between">
-                <strong>@komitet.NazwaKomitetu</strong>
-                <span>Głosy: @komitet.Glosy — Mandaty: @komitet.Mandaty</span>
-            </div>
-            <table class="table mb-0">
-                <thead>
-                    <tr>
-                        <th>Nr</th>
-                        <th>Kandydat</th>
-                        <th>Komitet</th>
-                        <th>Głosy</th>
-                        <th>Mandat</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach (var kandydat in komitet.Kandydaci)
-                    {
-                        <tr class="@(kandydat.CzyZdobylMandat ? "table-success" : "")">
-                            <td>@kandydat.NumerNaLiscie</td>
-                            <td>@kandydat.ImieNazwisko</td>
-                            <td>@kandydat.NazwaKomitetu</td>
-                            <td>@kandydat.Glosy</td>
-                            <td>@(kandydat.CzyZdobylMandat ? "✓" : "")</td>
-                        </tr>
-                    }
-                </tbody>
-            </table>
-        </div>
+        <partial name="_KartaKomitetu" model="komitet" />
     }
 }

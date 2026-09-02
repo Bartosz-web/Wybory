@@ -1,0 +1,16 @@
+@page "/Blad/{kod:int?}"
+@model Wybory.Web.Pages.BladModel
+@{
+    ViewData["Title"] = Model.Naglowek;
+}
+
+<h1>@Model.Naglowek</h1>
+<p class="lead">@Model.Opis</p>
+<p class="text-muted">Kod odpowiedzi HTTP: @Model.Kod</p>
+
+<div class="skroty">
+    <a class="skrot" asp-page="/Index">Strona startowa</a>
+    <a class="skrot" asp-page="/Glosowanie/Index">Głosowanie</a>
+    <a class="skrot" asp-page="/Wyniki/Index">Wyniki</a>
+    <a class="skrot" asp-page="/Wyborcy/Lista">Lista wyborców</a>
+</div>

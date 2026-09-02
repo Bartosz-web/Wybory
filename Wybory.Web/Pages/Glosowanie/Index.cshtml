@@ -6,35 +6,104 @@
 
 <h1>Głosowanie</h1>
 
+<p class="text-muted formularz-waski">
+    Wybierz okręg, a następnie siebie z listy wyborców. Na liście są wyłącznie osoby
+    z czynnym prawem wyborczym, które jeszcze nie zagłosowały.
+</p>
+
+@* Formularz GET: wybór okręgu jest stanem widoku, więc ma być w adresie. *@
+<form method="get" class="filtry" data-auto-submit>
+    <div>
+        <label class="form-label" for="OkregId">Okręg</label>
+        <select class="form-select" id="OkregId" name="OkregId">
+            <option value="">-- wybierz okręg --</option>
+            @foreach (var okreg in Model.Okregi)
+            {
+                <option value="@okreg.Id" selected="@(Model.OkregId == okreg.Id)">@okreg.Nazwa</option>
+            }
+        </select>
+    </div>
+    <div class="filtry-akcja">
+        <button type="submit" class="btn btn-primary">Pokaż kartę do głosowania</button>
+    </div>
+</form>
+
 @if (Model.Komunikat is not null)
 {
     <div class="alert alert-success">@Model.Komunikat</div>
 }
 <div asp-validation-summary="All" class="text-danger"></div>
 
-<form method="post">
-    <div class="mb-3">
-        <label class="form-label" asp-for="Formularz.Pesel"></label>
-        <div class="input-group">
-            <input class="form-control" asp-for="Formularz.Pesel" maxlength="11" />
-            <button type="submit" asp-page-handler="PokazKandydatow" class="btn btn-outline-primary">Pokaż kandydatów w moim okręgu</button>
-        </div>
-    </div>
+@if (Model.OkregId is not null)
+{
+    @await Html.PartialAsync("_PanelFrekwencji",
+        new Wybory.Web.Pages.Shared.DaneFrekwencji("Frekwencja w okręgu", Model.LiczbaUprawnionych, Model.LiczbaGlosow))
 
-    @if (Model.Kandydaci.Count > 0)
+    @if (Model.LiczbaUprawnionych == 0)
     {
-        <fieldset class="mb-3">
-            <legend>Wybierz kandydata</legend>
-            @foreach (var kandydat in Model.Kandydaci)
-            {
-                <div class="form-check">
-                    <input class="form-check-input" type="radio" name="Formularz.KandydatId" value="@kandydat.Id" id="kandydat-@kandydat.Id" />
-                    <label class="form-check-label" for="kandydat-@kandydat.Id">
-                        @kandydat.Wyborca!.Imie @kandydat.Wyborca!.Nazwisko — <strong>@kandydat.Komitet!.Nazwa</strong> (nr @kandydat.NumerNaLiscie)
-                    </label>
-                </div>
-            }
-        </fieldset>
-        <button type="submit" asp-page-handler="OddajGlos" class="btn btn-success">Oddaj głos</button>
+        <div class="alert alert-warning">
+            W tym okręgu nie ma zarejestrowanych wyborców z czynnym prawem wyborczym.
+            <a asp-page="/Wyborcy/Rejestracja">Zarejestruj wyborcę</a>.
+        </div>
     }
-</form>
+    else if (Model.Listy.Count == 0)
+    {
+        <div class="alert alert-warning">
+            W tym okręgu nie zarejestrowano żadnych kandydatów.
+            <a asp-page="/Kandydaci/Rejestracja">Zarejestruj kandydata</a>.
+        </div>
+    }
+    else if (Model.Nieglosujacy.Count == 0)
+    {
+        <div class="alert alert-info">
+            Wszyscy uprawnieni w tym okręgu już zagłosowali.
+            <a asp-page="/Wyniki/Index" asp-route-okregId="@Model.OkregId">Zobacz wyniki</a>.
+        </div>
+    }
+    else
+    {
+        <form method="post">
+            <input type="hidden" name="OkregId" value="@Model.OkregId" />
+
+            <div class="mb-3 formularz-waski">
+                <label class="form-label" for="Formularz_WyborcaId">Wyborca</label>
+                <select class="form-select" id="Formularz_WyborcaId" asp-for="Formularz.WyborcaId">
+                    <option value="0">-- wybierz wyborcę --</option>
+                    @foreach (var wyborca in Model.Nieglosujacy)
+                    {
+                        <option value="@wyborca.Id">@wyborca.Nazwisko @wyborca.Imie — @wyborca.Pesel</option>
+                    }
+                </select>
+                <div class="form-text">Pozostało @Model.Nieglosujacy.Count osób, które jeszcze nie głosowały.</div>
+            </div>
+
+            <fieldset class="karta-do-glosowania">
+                <legend class="h2">Karta do głosowania</legend>
+
+                @foreach (var lista in Model.Listy)
+                {
+                    <div class="lista-komitetu">
+                        <h3 class="lista-komitetu-naglowek">@lista.NazwaKomitetu</h3>
+                        @foreach (var kandydat in lista.Kandydaci)
+                        {
+                            <div class="form-check kandydat-wybor">
+                                <input class="form-check-input" type="radio" asp-for="Formularz.KandydatId"
+                                       value="@kandydat.Id" id="kandydat-@kandydat.Id" />
+                                <label class="form-check-label" for="kandydat-@kandydat.Id">
+                                    <span class="kandydat-numer">@kandydat.NumerNaLiscie</span>
+                                    @kandydat.Wyborca!.Imie @kandydat.Wyborca!.Nazwisko
+                                </label>
+                            </div>
+                        }
+                    </div>
+                }
+            </fieldset>
+
+            <button type="submit" asp-page-handler="OddajGlos" class="btn btn-success btn-lg w-sm-auto">Oddaj głos</button>
+        </form>
+    }
+}
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

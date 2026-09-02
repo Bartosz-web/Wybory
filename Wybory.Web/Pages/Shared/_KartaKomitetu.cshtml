@@ -1,0 +1,60 @@
+@using System.Globalization
+@model Wybory.Web.Uslugi.WynikKomitetu
+@{
+    // Kultura niezmienna: polski przecinek dziesiętny dałby nieprawidłowe
+    // "width: 12,5%".
+    var szerokosc = Model.ProcentGlosow.ToString("0.##", CultureInfo.InvariantCulture);
+    var procent = Model.ProcentGlosow.ToString("0.0");
+    var opisPaska = $"Udział w głosach: {procent} procent";
+}
+
+<div class="card mb-3 @(Model.PonizejProgu ? "karta-ponizej-progu" : "")">
+    <div class="card-header">
+        <strong>@Model.NazwaKomitetu</strong>
+        <span>Głosy: @Model.Glosy (@procent%) — Mandaty: @Model.Mandaty</span>
+    </div>
+
+    <div class="card-body py-2">
+        <div class="pasek" role="img" aria-label="@opisPaska">
+            <span style="width: @szerokosc%"></span>
+        </div>
+
+        @if (Model.PonizejProgu)
+        {
+            <p class="tekst-prog">Komitet nie przekroczył progu wyborczego — nie bierze udziału w podziale mandatów.</p>
+        }
+        else if (Model.Mandaty > 0)
+        {
+            <div class="mandaty" role="img" aria-label="Zdobyte mandaty: @Model.Mandaty">
+                @for (var i = 0; i < Model.Mandaty; i++)
+                {
+                    <span class="mandat"></span>
+                }
+            </div>
+        }
+    </div>
+
+    <div class="table-responsive">
+        <table class="table tabela-karty mb-0">
+            <thead>
+                <tr>
+                    <th class="kol-waska">Nr</th>
+                    <th>Kandydat</th>
+                    <th class="kol-waska">Głosy</th>
+                    <th class="kol-waska">Mandat</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var kandydat in Model.Kandydaci)
+                {
+                    <tr class="@(kandydat.CzyZdobylMandat ? "table-success" : "")">
+                        <td class="kol-waska" data-etykieta="Nr">@kandydat.NumerNaLiscie</td>
+                        <td data-etykieta="Kandydat">@kandydat.ImieNazwisko</td>
+                        <td class="kol-waska" data-etykieta="Głosy">@kandydat.Glosy</td>
+                        <td class="kol-waska" data-etykieta="Mandat">@(kandydat.CzyZdobylMandat ? "✓" : "")</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

@@ -5,7 +5,7 @@
 }
 
 <h1>Rejestracja kandydata</h1>
-<p class="text-muted">Kandydat musi być wyborcą z biernym prawem wyborczym i musi zostać przypisany do komitetu
+<p class="text-muted formularz-waski">Kandydat musi być wyborcą z biernym prawem wyborczym i musi zostać przypisany do komitetu
     zarejestrowanego w wybranym okręgu.</p>
 
 @if (Model.Komunikat is not null)
@@ -14,30 +14,34 @@
 }
 <div asp-validation-summary="All" class="text-danger"></div>
 
-<form method="post">
+@if (Model.UprawnieniWyborcy.Count == 0)
+{
+    <div class="alert alert-warning">
+        Nie ma wyborców z biernym prawem wyborczym, którzy jeszcze nie kandydują.
+        <a asp-page="/Wyborcy/Rejestracja">Zarejestruj wyborcę</a> z zaznaczonym biernym prawem wyborczym.
+    </div>
+}
+
+<form method="post" class="formularz-waski">
     <div class="mb-3">
-        <label class="form-label">Wyborca (z biernym prawem wyborczym)</label>
+        <label class="form-label" for="filtr-wyborcy">Wyborca (z biernym prawem wyborczym)</label>
+        @* Bez JavaScriptu pole filtrujące jest ukryte, a lista działa normalnie. *@
+        <input class="form-control mb-2 filtr-listy" id="filtr-wyborcy" type="search" hidden
+               placeholder="Zawęź listę: nazwisko, imię lub PESEL" autocomplete="off"
+               data-filtruje="Formularz_WyborcaId" />
         <select class="form-select" asp-for="Formularz.WyborcaId">
             <option value="0">-- wybierz wyborcę --</option>
             @foreach (var wyborca in Model.UprawnieniWyborcy)
             {
-                <option value="@wyborca.Id">@wyborca.Imie @wyborca.Nazwisko (@wyborca.Pesel)</option>
+                <option value="@wyborca.Id">@wyborca.Nazwisko @wyborca.Imie (@wyborca.Pesel)</option>
             }
         </select>
     </div>
+
+    @* Okręg przed komitetem: wybór okręgu zawęża listę komitetów, więc musi być pierwszy. *@
     <div class="mb-3">
-        <label class="form-label">Komitet</label>
-        <select class="form-select" asp-for="Formularz.KomitetId">
-            <option value="0">-- wybierz komitet --</option>
-            @foreach (var komitet in Model.Komitety)
-            {
-                <option value="@komitet.Id">@komitet.Nazwa</option>
-            }
-        </select>
-    </div>
-    <div class="mb-3">
-        <label class="form-label">Okręg (musi być okręgiem, w którym komitet jest zarejestrowany)</label>
-        <select class="form-select" asp-for="Formularz.OkregId">
+        <label class="form-label" asp-for="Formularz.OkregId">Okręg</label>
+        <select class="form-select" asp-for="Formularz.OkregId" id="Formularz_OkregId">
             <option value="0">-- wybierz okręg --</option>
             @foreach (var okreg in Model.Okregi)
             {
@@ -45,9 +49,31 @@
             }
         </select>
     </div>
+
+    <div class="mb-3">
+        <label class="form-label" asp-for="Formularz.KomitetId">Komitet</label>
+        @* data-okregi trzyma listę okręgów komitetu, po której filtruje skrypt. *@
+        <select class="form-select" asp-for="Formularz.KomitetId" id="Formularz_KomitetId"
+                data-zalezny-od="Formularz_OkregId">
+            <option value="0">-- wybierz komitet --</option>
+            @foreach (var komitet in Model.Komitety)
+            {
+                var okregiKomitetu = string.Join(",", komitet.OkregiIds);
+                <option value="@komitet.Id" data-okregi="@okregiKomitetu">@komitet.Nazwa</option>
+            }
+        </select>
+        <div class="form-text">Po wybraniu okręgu lista zawęża się do komitetów w nim zarejestrowanych.</div>
+    </div>
+
     <div class="mb-3">
         <label class="form-label" asp-for="Formularz.NumerNaLiscie"></label>
-        <input class="form-control" type="number" min="1" max="10" asp-for="Formularz.NumerNaLiscie" />
+        <input class="form-control" type="number" inputmode="numeric" min="1" max="10" asp-for="Formularz.NumerNaLiscie" />
     </div>
-    <button type="submit" class="btn btn-primary">Zarejestruj kandydata</button>
+
+    <button type="submit" class="btn btn-primary w-sm-auto">Zarejestruj kandydata</button>
 </form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script src="~/js/formularze.js" asp-append-version="true"></script>
+}

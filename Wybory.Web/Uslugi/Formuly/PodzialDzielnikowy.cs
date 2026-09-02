@@ -20,7 +20,15 @@ internal static class PodzialDzielnikowy
                 ilorazy.Add((komitetId, glosy / dzielnik(miejsce)));
         }
 
-        foreach (var (komitetId, _) in ilorazy.OrderByDescending(i => i.Iloraz).Take(liczbaMandatow))
+        // Remis ilorazów rozstrzygany jawnie, żeby wynik był powtarzalny: większy
+        // iloraz, potem większe poparcie komitetu, na końcu mniejsze Id. Kodeks
+        // wyborczy rozstrzyga taki remis losowaniem.
+        var kolejnosc = ilorazy
+            .OrderByDescending(i => i.Iloraz)
+            .ThenByDescending(i => glosyNaKomitety[i.KomitetId])
+            .ThenBy(i => i.KomitetId);
+
+        foreach (var (komitetId, _) in kolejnosc.Take(liczbaMandatow))
             mandaty[komitetId]++;
 
         return mandaty;

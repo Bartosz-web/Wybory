@@ -23,6 +23,10 @@ if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Error");
 }
+
+// Kody odpowiedzi bez wyjątku, przede wszystkim 404.
+app.UseStatusCodePagesWithReExecute("/Blad/{0}");
+
 app.UseStaticFiles();
 
 app.UseRouting();

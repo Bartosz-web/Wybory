@@ -12,25 +12,26 @@
 }
 <div asp-validation-summary="All" class="text-danger"></div>
 
-<form method="post">
+<form method="post" class="formularz-waski">
     <div class="mb-3">
         <label class="form-label" asp-for="Formularz.Pesel"></label>
-        <div class="input-group">
-            <input class="form-control" asp-for="Formularz.Pesel" maxlength="11" />
+        <div class="pole-z-akcja">
+            <input class="form-control" asp-for="Formularz.Pesel" maxlength="11"
+                   inputmode="numeric" pattern="[0-9]*" autocomplete="off" />
             <button type="button" id="losuj-pesel" class="btn btn-outline-secondary">Losuj</button>
         </div>
     </div>
     <div class="mb-3">
         <label class="form-label" asp-for="Formularz.Imie"></label>
-        <div class="input-group">
-            <input class="form-control" asp-for="Formularz.Imie" />
+        <div class="pole-z-akcja">
+            <input class="form-control" asp-for="Formularz.Imie" autocomplete="given-name" />
             <button type="button" id="losuj-imie" class="btn btn-outline-secondary">Losuj</button>
         </div>
     </div>
     <div class="mb-3">
         <label class="form-label" asp-for="Formularz.Nazwisko"></label>
-        <div class="input-group">
-            <input class="form-control" asp-for="Formularz.Nazwisko" />
+        <div class="pole-z-akcja">
+            <input class="form-control" asp-for="Formularz.Nazwisko" autocomplete="family-name" />
             <button type="button" id="losuj-nazwisko" class="btn btn-outline-secondary">Losuj</button>
         </div>
     </div>
@@ -52,9 +53,10 @@
         <input class="form-check-input" type="checkbox" asp-for="Formularz.BierneProwoWyborcze" />
         <label class="form-check-label" asp-for="Formularz.BierneProwoWyborcze">Bierne prawo wyborcze (może kandydować)</label>
     </div>
-    <button type="submit" class="btn btn-primary">Zarejestruj</button>
+    <button type="submit" class="btn btn-primary w-sm-auto">Zarejestruj</button>
 </form>
 
 @section Scripts {
+    <partial name="_ValidationScriptsPartial" />
     <script src="~/js/losowanie.js" asp-append-version="true"></script>
 }

@@ -1,0 +1,47 @@
+@page
+@model Wybory.Web.Pages.Komitety.ListaModel
+@{
+    ViewData["Title"] = "Lista komitetów";
+}
+
+<h1>Lista komitetów wyborczych</h1>
+
+@if (Model.Komitety.Count == 0)
+{
+    <div class="alert alert-info">
+        Nie zarejestrowano jeszcze żadnego komitetu.
+        <a asp-page="/Komitety/Rejestracja">Zarejestruj pierwszy</a>
+        albo uruchom symulację na <a asp-page="/Index">stronie startowej</a>.
+    </div>
+}
+else
+{
+    <div class="table-responsive">
+        <table class="table tabela-karty">
+            <thead>
+                <tr>
+                    <th>Komitet</th>
+                    <th>Zarejestrowany w okręgach</th>
+                    <th class="kol-waska">Kandydatów</th>
+                    <th class="kol-waska">Głosów</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var komitet in Model.Komitety)
+                {
+                    <tr>
+                        <td data-etykieta="Komitet"><strong>@komitet.Nazwa</strong></td>
+                        <td data-etykieta="Okręgi">
+                            @foreach (var okreg in komitet.Okregi)
+                            {
+                                <span class="znacznik znacznik-okreg">@okreg</span>
+                            }
+                        </td>
+                        <td class="kol-waska" data-etykieta="Kandydatów">@komitet.Kandydatow</td>
+                        <td class="kol-waska" data-etykieta="Głosów">@komitet.Glosow</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}

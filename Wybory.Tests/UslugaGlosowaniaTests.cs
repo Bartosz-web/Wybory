@@ -69,4 +69,84 @@ public class UslugaGlosowaniaTests
 
         await Assert.ThrowsAsync<BladRegulyBiznesowej>(() => usluga.OddajGlosAsync(wyborca.Pesel, kandydat.Id));
     }
+
+    [Fact]
+    public async Task OddajGlos_BezWybranegoKandydata_RzucaWyjatek()
+    {
+        var (db, wyborca, _, _) = await PrzygotujDaneAsync(czynnePrawo: true);
+        var usluga = new UslugaGlosowania(db);
+
+        await Assert.ThrowsAsync<BladRegulyBiznesowej>(() => usluga.OddajGlosAsync(wyborca.Pesel, 0));
+    }
+
+    [Fact]
+    public async Task OddajGlosPoId_ZwracaKandydataZWyborcaIKomitetem()
+    {
+        var (db, wyborca, kandydat, _) = await PrzygotujDaneAsync(czynnePrawo: true);
+        var usluga = new UslugaGlosowania(db);
+
+        var oddanyNa = await usluga.OddajGlosAsync(wyborca.Id, kandydat.Id);
+
+        Assert.Equal(kandydat.Id, oddanyNa.Id);
+        Assert.Equal("Komitet A", oddanyNa.Komitet!.Nazwa);
+        Assert.Equal("Jeden", oddanyNa.Wyborca!.Nazwisko);
+    }
+
+    [Fact]
+    public async Task OddajGlosPoId_NieistniejacyWyborca_RzucaWyjatek()
+    {
+        var (db, _, kandydat, _) = await PrzygotujDaneAsync(czynnePrawo: true);
+        var usluga = new UslugaGlosowania(db);
+
+        await Assert.ThrowsAsync<BladRegulyBiznesowej>(() => usluga.OddajGlosAsync(999, kandydat.Id));
+    }
+
+    [Fact]
+    public async Task PobierzNieglosujacych_PomijaOsobyBezCzynnegoPrawaIZInnychOkregow()
+    {
+        var (db, wyborca, _, _) = await PrzygotujDaneAsync(czynnePrawo: true);
+        var usluga = new UslugaGlosowania(db);
+
+        var nieglosujacy = await usluga.PobierzNieglosujacychAsync(1);
+
+        // W okręgu 1 są dwie osoby, ale kandydat ma wyłączone czynne prawo.
+        Assert.Single(nieglosujacy);
+        Assert.Equal(wyborca.Id, nieglosujacy[0].Id);
+    }
+
+    [Fact]
+    public async Task PobierzNieglosujacych_PoOddaniuGlosuWyborcaZnikaZListy()
+    {
+        var (db, wyborca, kandydat, _) = await PrzygotujDaneAsync(czynnePrawo: true);
+        var usluga = new UslugaGlosowania(db);
+        Assert.Single(await usluga.PobierzNieglosujacychAsync(1));
+
+        await usluga.OddajGlosAsync(wyborca.Id, kandydat.Id);
+
+        Assert.Empty(await usluga.PobierzNieglosujacychAsync(1));
+    }
+
+    [Fact]
+    public async Task PoliczUprawnionych_LiczyTylkoOsobyZCzynnymPrawemWOkregu()
+    {
+        var (db, _, _, _) = await PrzygotujDaneAsync(czynnePrawo: true);
+        var usluga = new UslugaGlosowania(db);
+
+        Assert.Equal(1, await usluga.PoliczUprawnionychAsync(1));
+        Assert.Equal(0, await usluga.PoliczUprawnionychAsync(2));
+    }
+
+    [Fact]
+    public async Task PobierzKandydatowWOkregu_ZwracaTylkoKandydatowZTegoOkregu()
+    {
+        var (db, _, kandydatWOkregu, _) = await PrzygotujDaneAsync(czynnePrawo: true);
+        var usluga = new UslugaGlosowania(db);
+
+        var kandydaci = await usluga.PobierzKandydatowWOkreguAsync(1);
+
+        Assert.Single(kandydaci);
+        Assert.Equal(kandydatWOkregu.Id, kandydaci[0].Id);
+        Assert.NotNull(kandydaci[0].Komitet);
+        Assert.NotNull(kandydaci[0].Wyborca);
+    }
 }

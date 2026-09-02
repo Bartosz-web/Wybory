@@ -6,10 +6,10 @@
 
 <h1>Lista kandydatów</h1>
 
-<form method="get" class="row g-2 align-items-end mb-4">
-    <div class="col-auto">
-        <label class="form-label">Okręg</label>
-        <select class="form-select" name="okregId">
+<form method="get" class="filtry">
+    <div>
+        <label class="form-label" for="okregId">Okręg</label>
+        <select class="form-select" id="okregId" name="okregId">
             <option value="">-- wybierz okręg --</option>
             @foreach (var okreg in Model.Okregi)
             {
@@ -17,7 +17,7 @@
             }
         </select>
     </div>
-    <div class="col-auto">
+    <div class="filtry-akcja">
         <button type="submit" class="btn btn-primary">Pokaż kandydatów</button>
     </div>
 </form>
@@ -36,29 +36,31 @@
             <div class="accordion-item">
                 <h2 class="accordion-header">
                     <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#@kolapsId">
-                        @komitet.NazwaKomitetu
-                        <span class="text-muted ms-2">(@komitet.Kandydaci.Count kandydatów)</span>
+                        <span>@komitet.NazwaKomitetu</span>
+                        <span class="text-muted">(@komitet.Kandydaci.Count kandydatów)</span>
                     </button>
                 </h2>
                 <div id="@kolapsId" class="accordion-collapse collapse" data-bs-parent="#komitetyAccordion">
-                    <div class="accordion-body p-0">
-                        <table class="table mb-0">
-                            <thead>
-                                <tr>
-                                    <th>Numer na liście</th>
-                                    <th>Kandydat</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @foreach (var kandydat in komitet.Kandydaci)
-                                {
+                    <div class="accordion-body p-2 p-sm-0">
+                        <div class="table-responsive">
+                            <table class="table tabela-karty">
+                                <thead>
                                     <tr>
-                                        <td>@kandydat.NumerNaLiscie</td>
-                                        <td>@kandydat.Wyborca!.Imie @kandydat.Wyborca!.Nazwisko</td>
+                                        <th class="kol-waska">Numer na liście</th>
+                                        <th>Kandydat</th>
                                     </tr>
-                                }
-                            </tbody>
-                        </table>
+                                </thead>
+                                <tbody>
+                                    @foreach (var kandydat in komitet.Kandydaci)
+                                    {
+                                        <tr>
+                                            <td class="kol-waska" data-etykieta="Nr na liście">@kandydat.NumerNaLiscie</td>
+                                            <td data-etykieta="Kandydat">@kandydat.Wyborca!.Imie @kandydat.Wyborca!.Nazwisko</td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
             </div>
